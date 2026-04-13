@@ -46,6 +46,11 @@ const createNewChat = () => {
           data={conversations}
           keyExtractor={(item) => item.id}
           renderItem={renderItem}
+          contentContainerStyle={
+            conversations.length > 0
+              ? styles.centerList
+              : undefined
+          }
         />
       )}
 
@@ -57,6 +62,16 @@ const createNewChat = () => {
 }
 
 const styles = StyleSheet.create({
+  headerTitle: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginBottom: 12,
+    color: '#000',
+  },
+  centerList: {
+    flexGrow: 1,
+    justifyContent: 'center',
+  },
   container: {
     flex: 1,
     padding: 16,
