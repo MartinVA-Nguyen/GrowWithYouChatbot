@@ -67,6 +67,12 @@ return (
       <View style={styles.container}>
       <Text style={styles.header}>Chat: {id}</Text>
 
+      {loading && (
+        <Text style={{ marginBottom: 8, color: '#888' }}>
+          Bot is typing...
+        </Text>
+      )}
+
       <FlatList
         data={messages}
         keyExtractor={(item, index) => index.toString()}
