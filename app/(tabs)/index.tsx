@@ -2,19 +2,34 @@ import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 
-function createNewChat() {
-  const newId = Date.now().toString();
-  router.push(`/chat/${newId}`);
-}
+type Conversation = {
+  id: string;
+  title: string;
+  lastMessage: string;
+};
 
 export default function HomeScreen() {
-  const [conversations, setConversations] = useState([]);
+  const [conversations, setConversations] = useState<Conversation[]>([]);
 
-  const renderItem = ({ item }: any) => (
+const createNewChat = () => {
+  const newId = Date.now().toString();
+
+  const newConversation = {
+    id: newId,
+    title: newId, 
+    lastMessage: '',
+  };
+
+  setConversations(prev => [newConversation, ...prev]);
+
+  router.push(`/chat/${newId}`);
+};
+
+  const renderItem = ({ item }: { item: Conversation }) => (
     <Link href={`/chat/${item.id}`} asChild>
       <Pressable style={styles.chatItem}>
         <Text style={styles.chatTitle}>{item.title}</Text>
-        <Text style={styles.chatPreview}>{item.lastMessage}</Text>
+        <Text style={styles.chatPreview}>{item.lastMessage || 'No messages yet'}</Text>
       </Pressable>
     </Link>
   );
@@ -29,14 +44,14 @@ export default function HomeScreen() {
       ) : (
         <FlatList
           data={conversations}
-          keyExtractor={(item: any) => item.id}
+          keyExtractor={(item) => item.id}
           renderItem={renderItem}
         />
       )}
 
-        <Pressable style={styles.fab} onPress={createNewChat}>
-          <Text style={styles.fabText}>＋</Text>
-        </Pressable>
+      <Pressable style={styles.fab} onPress={createNewChat}>
+        <Text style={styles.fabText}>＋</Text>
+      </Pressable>
     </View>
   );
 }
