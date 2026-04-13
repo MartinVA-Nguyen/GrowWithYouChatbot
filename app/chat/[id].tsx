@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { FlatList, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
@@ -54,18 +54,23 @@ async function sendMessage() {
       },
     ]);
   } finally {
-    // 👇 stop loading no matter what
     setLoading(false);
   }
 }
 
-  return (
-    <View style={styles.container}>
+return (
+  <KeyboardAvoidingView
+    style={{ flex: 1 }}
+    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    keyboardVerticalOffset={80}
+  >
+      <View style={styles.container}>
       <Text style={styles.header}>Chat: {id}</Text>
 
       <FlatList
         data={messages}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => index.toString()}
+        contentContainerStyle={{paddingBottom: 100,}}
         renderItem={({ item }) => (
           <View
             style={[
@@ -91,8 +96,8 @@ async function sendMessage() {
         </Pressable>
       </View>
     </View>
-  );
-}
+  </KeyboardAvoidingView>
+);}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 12 },
