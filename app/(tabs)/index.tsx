@@ -34,11 +34,9 @@ export default function HomeScreen() {
         />
       )}
 
-      <Link href="/chat/new" asChild>
         <Pressable style={styles.fab} onPress={createNewChat}>
           <Text style={styles.fabText}>＋</Text>
         </Pressable>
-      </Link>
     </View>
   );
 }
