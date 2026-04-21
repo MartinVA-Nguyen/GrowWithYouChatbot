@@ -1,3 +1,4 @@
+import db from '@/database';
 import { Link, router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -14,9 +15,16 @@ export default function HomeScreen() {
 const createNewChat = () => {
   const newId = Date.now().toString();
 
+  db.runSync(
+    // For now, title is just id.
+    // TODO: Make a function with LLM so that it produces a title based on first message, and set title to that.
+    'INSERT INTO conversations (id, title) VALUES (?, ?)',
+    [newId, newId]
+  );
+
   const newConversation = {
     id: newId,
-    title: newId, 
+    title: newId,
     lastMessage: '',
   };
 
