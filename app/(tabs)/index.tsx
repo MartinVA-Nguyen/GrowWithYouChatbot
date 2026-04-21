@@ -33,14 +33,40 @@ const createNewChat = () => {
   router.push(`/chat/${newId}`);
 };
 
-  const renderItem = ({ item }: { item: Conversation }) => (
+const deleteConversation = (id: string) => {
+  db.runSync(
+    'DELETE FROM conversations WHERE id = ?',
+    [id]
+  );
+
+  db.runSync(
+    'DELETE FROM messages WHERE conversationId = ?',
+    [id]
+  );
+
+  setConversations(prev => prev.filter(c => c.id !== id));
+};
+
+
+const renderItem = ({ item }: { item: Conversation }) => (
+  <View style={styles.chatRow}>
     <Link href={`/chat/${item.id}`} asChild>
       <Pressable style={styles.chatItem}>
         <Text style={styles.chatTitle}>{item.title}</Text>
-        <Text style={styles.chatPreview}>{item.lastMessage || 'No messages yet'}</Text>
+        <Text style={styles.chatPreview}>
+          {item.lastMessage || 'No messages yet'}
+        </Text>
       </Pressable>
     </Link>
-  );
+
+    <Pressable
+      onPress={() => deleteConversation(item.id)}
+      style={styles.deleteButton}
+    >
+      <Text style={styles.deleteText}>🗑</Text>
+    </Pressable>
+  </View>
+);
 
   return (
     <View style={styles.container}>
@@ -70,6 +96,26 @@ const createNewChat = () => {
 }
 
 const styles = StyleSheet.create({
+  chatRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  chatItem: {
+    flex: 1,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderColor: '#F0F0F0',
+    backgroundColor: '#FFFFFF',
+  },
+  deleteButton: {
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+  },
+  deleteText: {
+    fontSize: 18,
+    color: '#FF3B30',
+  },
   headerTitle: {
     fontSize: 22,
     fontWeight: '700',
@@ -100,12 +146,6 @@ const styles = StyleSheet.create({
     marginTop: 6,
     color: '#888',
   },
-  chatItem: {
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderColor: '#F0F0F0',
-    backgroundColor: '#FFFFFF',
-  },
   chatTitle: {
     fontSize: 16,
     fontWeight: '600',
@@ -130,4 +170,5 @@ const styles = StyleSheet.create({
     color: '#FFF',
     fontSize: 26,
   },
+
 });
