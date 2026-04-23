@@ -6,10 +6,6 @@ import { useEffect } from 'react';
 import 'react-native-reanimated';
 import { initDB } from '../database';
 
-//export const unstable_settings = {
-//  anchor: '(tabs)',
-//};
-
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
@@ -19,10 +15,16 @@ export default function RootLayout() {
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <Stack>
-        <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-        <Stack.Screen name="modal" options={{ presentation: 'modal', title: 'Modal' }} />
+      <Stack
+        screenOptions={{
+          headerBackTitle: 'Home', // 👈 )
+        }}
+      >
+        <Stack.Screen name="index" options={{ title: 'Home' }} />
+        <Stack.Screen name="chat/[id]" options={{ title: 'Chat' }} />
+        <Stack.Screen name="modal" options={{ presentation: 'modal' }} />
       </Stack>
+
       <StatusBar style="auto" />
     </ThemeProvider>
   );
