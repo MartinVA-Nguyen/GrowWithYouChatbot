@@ -1,109 +1,129 @@
+import db, { insertMessage } from '@/database';
 import { useLocalSearchParams } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
 export default function ChatScreen() {
   const { id } = useLocalSearchParams();
-
+  const conversationId = Array.isArray(id) ? id[0] : id;
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState('');
   const [loading, setLoading] = useState(false);
 
-async function sendMessage() {
-  if (!text.trim()) return;
+  useEffect(() => {
+    if (!conversationId) return;
 
-  const userMessage = {
-    role: 'user',
-    text,
-  };
+    const rows = db.getAllSync(
+      `SELECT id, role, text FROM messages
+       WHERE conversationId = ?
+       ORDER BY createdAt ASC`,
+      [conversationId]
+    );
 
-  // shows user message immediately
-  setMessages((prev) => [...prev, userMessage]);
-  setText('');
+    setMessages(rows as any[]);
+  }, [conversationId]);
 
-  // start loading
-  setLoading(true);
+  async function sendMessage() {
+    if (!text.trim() || !conversationId) return;
 
-  try {
-    const res = await fetch('n8n webhook url', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        message: userMessage.text,
-      }),
-    });
-
-    const data = await res.json();
-
-    const botMessage = {
-      role: 'bot',
-      text: data.reply || 'No response',
+    const userMessage = {
+      role: 'user',
+      text,
     };
 
-    setMessages((prev) => [...prev, botMessage]);
-  } catch (error) {
-    console.error(error);
+    // show instantly
+    setMessages((prev) => [...prev, userMessage]);
 
-    setMessages((prev) => [
-      ...prev,
-      {
+    // save user message
+    insertMessage(conversationId, 'user', text);
+
+    setText('');
+    setLoading(true);
+
+    try {
+      const res = await fetch('n8n webhook url', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: userMessage.text }),
+      });
+
+      const data = await res.json();
+
+      const botMessage = {
+        role: 'bot',
+        text: data.reply || 'No response',
+      };
+
+      setMessages((prev) => [...prev, botMessage]);
+
+      // save bot message
+      insertMessage(conversationId, 'bot', botMessage.text);
+    } catch (error) {
+      console.error(error);
+
+      const errorMsg = {
         role: 'bot',
         text: 'Error connecting to server.',
-      },
-    ]);
-  } finally {
-    setLoading(false);
+      };
+
+      setMessages((prev) => [...prev, errorMsg]);
+
+      // save error message
+      insertMessage(conversationId, 'bot', errorMsg.text);
+    } finally {
+      setLoading(false);
+    }
   }
-}
 
-return (
-  <KeyboardAvoidingView
-    style={{ flex: 1 }}
-    behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    keyboardVerticalOffset={80}
-  >
+  return (
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={80}
+    >
       <View style={styles.container}>
-      <Text style={styles.header}>Chat: {id}</Text>
+        <Text style={styles.header}>Chat: {conversationId}</Text>
 
-      {loading && (
-        <Text style={{ marginBottom: 8, color: '#888' }}>
-          Bot is typing...
-        </Text>
-      )}
-
-      <FlatList
-        data={messages}
-        keyExtractor={(item, index) => index.toString()}
-        contentContainerStyle={{paddingBottom: 100,}}
-        renderItem={({ item }) => (
-          <View
-            style={[
-              styles.message,
-              item.role === 'user' ? styles.userMsg : styles.botMsg,
-            ]}
-          >
-            <Text>{item.text}</Text>
-          </View>
+        {loading && (
+          <Text style={{ marginBottom: 8, color: '#888' }}>
+            Bot is typing...
+          </Text>
         )}
-      />
 
-      <View style={styles.inputRow}>
-        <TextInput
-          style={styles.input}
-          value={text}
-          onChangeText={setText}
-          placeholder="Type a message..."
+        <FlatList
+          data={messages}
+          keyExtractor={(item, index) =>
+            item.id ? item.id.toString() : index.toString()
+          }
+          contentContainerStyle={{ paddingBottom: 100 }}
+          renderItem={({ item }) => (
+            <View
+              style={[
+                styles.message,
+                item.role === 'user' ? styles.userMsg : styles.botMsg,
+              ]}
+            >
+              <Text>{item.text}</Text>
+            </View>
+          )}
         />
 
-        <Pressable onPress={sendMessage} style={styles.button}>
-          <Text style={{ color: 'white' }}>Send</Text>
-        </Pressable>
+        <View style={styles.inputRow}>
+          <TextInput
+            style={styles.input}
+            value={text}
+            onChangeText={setText}
+            placeholder="Type a message..."
+          />
+
+          <Pressable onPress={sendMessage} style={styles.button}>
+            <Text style={{ color: 'white' }}>Send</Text>
+          </Pressable>
+        </View>
       </View>
-    </View>
-  </KeyboardAvoidingView>
-);}
+    </KeyboardAvoidingView>
+  );
+}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 12 },
