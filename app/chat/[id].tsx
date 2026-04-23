@@ -1,5 +1,5 @@
 import db, { insertMessage } from '@/database';
-import { useLocalSearchParams } from 'expo-router';
+import { Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -75,7 +75,15 @@ export default function ChatScreen() {
     }
   }
 
-  return (
+return (
+  <>
+    <Stack.Screen
+      options={{
+        headerShown: true,
+        title: conversationId ?? 'Chat',
+      }}
+    />
+
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
@@ -122,8 +130,8 @@ export default function ChatScreen() {
         </View>
       </View>
     </KeyboardAvoidingView>
-  );
-}
+  </>
+);}
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#fff', padding: 12 },
