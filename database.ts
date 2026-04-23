@@ -20,6 +20,19 @@ export function initDB() {
   `);
 }
 
+export function getLastMessages(conversationId: string, limit: number) {
+  const result = db.getAllSync(
+    `SELECT role, text
+     FROM messages
+     WHERE conversationId = ?
+     ORDER BY createdAt DESC
+     LIMIT ?`,
+    [conversationId, limit]
+  );
+
+  return result.reverse();
+}
+
 export function insertMessage(
   conversationId: string,
   role: string,

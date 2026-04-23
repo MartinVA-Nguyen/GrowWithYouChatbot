@@ -40,6 +40,7 @@ export default function ChatScreen() {
     setText('');
     setLoading(true);
 
+    // Need n8n webhook URL
     try {
       const res = await fetch('n8n webhook url', {
         method: 'POST',
