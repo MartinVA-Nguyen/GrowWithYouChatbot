@@ -29,9 +29,19 @@ async function registerForPushNotificationsAsync() {
 export default function RootLayout() {
   const colorScheme = useColorScheme();
 
-  useEffect(() => {
-    initDB();
-  }, []);
+useEffect(() => {
+  initDB();
+
+  async function setupPush() {
+    const token = await registerForPushNotificationsAsync(); // Asks user for permission, returns a unique ID for device.
+
+    if (token) {
+      console.log("Expo token:", token); // Essentially address of the phone for notifications.
+    }
+  }
+
+  setupPush();
+}, []);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
