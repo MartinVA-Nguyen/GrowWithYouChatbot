@@ -1,5 +1,5 @@
 import db, { getLastMessages, insertMessage } from '@/database';
-import { Stack, useLocalSearchParams } from 'expo-router';
+import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { FlatList, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 
@@ -89,62 +89,72 @@ return (
   <>
     <Stack.Screen
       options={{
-        headerShown: true,
-        title: conversationId ?? 'Chat',
+        headerShown: false,
       }}
     />
 
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={80}
-    >
-      <View style={styles.container}>
-        <Text style={styles.header}>Chat: {conversationId}</Text>
+    <View style={styles.appContainer}>
+      <View style={styles.appHeader}>
+        <Pressable onPress={() => router.back()} style={styles.backButton}>
+          <Text style={styles.backArrow}>←</Text>
+        </Pressable>
+        <Text style={styles.appHeaderText}>Chatbot</Text>
+        <View style={{ width: 40 }} />
+      </View>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        keyboardVerticalOffset={0}
+      >
+        <View style={styles.container}>
+          <View style={styles.chatHeader}>
+            <Text style={styles.chatHeaderText}>{conversationId}</Text>
+          </View>
 
-        {loading && (
-          <Text style={{ marginBottom: 8, color: '#888' }}>
-            Bot is typing...
-          </Text>
-        )}
-
-        <FlatList
-          data={messages}
-          keyExtractor={(item, index) =>
-            item.id ? item.id.toString() : index.toString()
-          }
-          contentContainerStyle={{ paddingBottom: 100 }}
-          renderItem={({ item }) => (
-            <View
-              style={[
-                styles.message,
-                item.role === 'user' ? styles.userMsg : styles.botMsg,
-              ]}
-            >
-              <Text>{item.text}</Text>
-            </View>
+          {loading && (
+            <Text style={{ marginBottom: 8, color: '#888' }}>
+              Bot is typing...
+            </Text>
           )}
-        />
 
-        <View style={styles.inputRow}>
-          <TextInput
-            style={styles.input}
-            value={text}
-            onChangeText={setText}
-            placeholder="Type a message..."
+          <FlatList
+            data={messages}
+            keyExtractor={(item, index) =>
+              item.id ? item.id.toString() : index.toString()
+            }
+            contentContainerStyle={{ paddingBottom: 100 }}
+            renderItem={({ item }) => (
+              <View
+                style={[
+                  styles.message,
+                  item.role === 'user' ? styles.userMsg : styles.botMsg,
+                ]}
+              >
+                <Text>{item.text}</Text>
+              </View>
+            )}
           />
 
-          <Pressable onPress={sendMessage} style={styles.button}>
-            <Text style={{ color: 'white' }}>Send</Text>
-          </Pressable>
+          <View style={styles.inputRow}>
+            <TextInput
+              style={styles.input}
+              value={text}
+              onChangeText={setText}
+              placeholder="Type a message..."
+            />
+
+            <Pressable onPress={sendMessage} style={styles.button}>
+              <Text style={{ color: 'black' }}>Send</Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
-    </KeyboardAvoidingView>
+      </KeyboardAvoidingView>
+    </View>
   </>
 );}
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#fff', padding: 12 },
+  container: { flex: 1, backgroundColor: '#E0F7FA', padding: 12 },
   header: { fontSize: 16, fontWeight: '600', marginBottom: 8 },
 
   message: {
@@ -166,6 +176,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     paddingTop: 8,
+    backgroundColor: '#F0F0F0',
+    borderRadius: 8,
+    padding: 8,
+    borderWidth: 2,
+    borderColor: '#333',
   },
   input: {
     flex: 1,
@@ -175,9 +190,54 @@ const styles = StyleSheet.create({
     padding: 10,
   },
   button: {
-    backgroundColor: '#00008B',
+    backgroundColor: '#F0F0F0',
     paddingHorizontal: 16,
     justifyContent: 'center',
     borderRadius: 8,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  appContainer: {
+    flex: 1,
+    backgroundColor: '#FFFFFF',
+  },
+  appHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    backgroundColor: '#E0F7FA',
+  },
+  backButton: {
+    width: 40,
+    height: 40,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  backArrow: {
+    fontSize: 24,
+    color: '#00008B',
+  },
+  appHeaderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2196F3',
+  },
+  chatHeader: {
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 8,
+    borderWidth: 2,
+    borderColor: '#333',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  chatHeaderText: {
+    fontSize: 16,
+    fontWeight: '600',
   },
 });

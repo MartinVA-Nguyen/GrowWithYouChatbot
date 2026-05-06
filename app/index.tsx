@@ -7,6 +7,7 @@ type Conversation = {
   id: string;
   title: string;
   lastMessage: string;
+  createdAt: number;
 };
 
 export default function HomeScreen() {
@@ -18,6 +19,7 @@ export default function HomeScreen() {
         SELECT 
           c.id,
           c.title,
+          CAST(c.id AS INTEGER) as createdAt,
           (
             SELECT text 
             FROM messages m 
@@ -52,11 +54,19 @@ export default function HomeScreen() {
     setConversations((prev) => prev.filter((c) => c.id !== id));
   };
 
+  const formatDate = (timestamp: number) => {
+    const date = new Date(timestamp);
+    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const year = String(date.getFullYear()).slice(-2);
+    return `${day}/${month}/${year}`;
+  };
+
   const renderItem = ({ item }: { item: Conversation }) => (
     <View style={styles.chatRow}>
       <Link href={`/chat/${item.id}`} asChild>
         <Pressable style={styles.chatItem}>
-          <Text style={styles.chatTitle}>{item.title}</Text>
+          <Text style={styles.chatTitle}>{formatDate(item.createdAt)} - {item.id}</Text>
           <Text style={styles.chatPreview}>
             {item.lastMessage || 'No messages yet'}
           </Text>
@@ -74,27 +84,29 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      {conversations.length === 0 ? (
-        <View style={styles.emptyState}>
-          <Text style={styles.emptyText}>No conversations yet</Text>
-          <Text style={styles.emptySubtext}>Start a new chat</Text>
+      <View style={styles.appHeader}>
+        <Text style={styles.appHeaderText}>Chatbot</Text>
+      </View>
+      <View style={styles.content}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Active:</Text>
+          <Pressable style={styles.headerPlus} onPress={createNewChat}>
+            <Text style={styles.headerPlusText}>＋</Text>
+          </Pressable>
         </View>
-      ) : (
-        <FlatList
-          data={conversations}
-          keyExtractor={(item) => item.id}
-          renderItem={renderItem}
-          contentContainerStyle={
-            conversations.length > 0
-              ? styles.centerList
-              : undefined
-          }
-        />
-      )}
-
-      <Pressable style={styles.fab} onPress={createNewChat}>
-        <Text style={styles.fabText}>＋</Text>
-      </Pressable>
+        {conversations.length === 0 ? (
+          <View style={styles.emptyState}>
+            <Text style={styles.emptyText}>No conversations yet</Text>
+            <Text style={styles.emptySubtext}>Start a new chat</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={conversations}
+            keyExtractor={(item) => item.id}
+            renderItem={renderItem}
+          />
+        )}
+      </View>
     </View>
   );
 }
@@ -104,17 +116,18 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+    paddingVertical: 16,
+    paddingHorizontal: 16,
+    borderWidth: 2,
+    borderColor: '#333',
   },
   chatItem: {
     flex: 1,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderColor: '#F0F0F0',
-    backgroundColor: '#FFFFFF',
   },
   deleteButton: {
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingHorizontal: 8,
   },
   deleteText: {
     fontSize: 18,
@@ -122,8 +135,24 @@ const styles = StyleSheet.create({
   },
   container: {
     flex: 1,
-    padding: 16,
     backgroundColor: '#FFFFFF',
+  },
+  appHeader: {
+    paddingTop: 48,
+    paddingBottom: 16,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+    backgroundColor: '#E0F7FA',
+  },
+  appHeaderText: {
+    fontSize: 24,
+    fontWeight: 'bold',
+    color: '#2196F3',
+  },
+  content: {
+    flex: 1,
+    padding: 16,
+    backgroundColor: '#E0F7FA',
   },
   emptyState: {
     flex: 1,
@@ -146,23 +175,33 @@ const styles = StyleSheet.create({
     color: '#666',
     marginTop: 4,
   },
-  fab: {
-    position: 'absolute',
-    bottom: 24,
-    right: 24,
-    backgroundColor: '#000',
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#F0F0F0',
+    borderRadius: 10,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 2,
+    borderColor: '#333',
+  },
+  headerText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+  },
+  headerPlus: {
+    backgroundColor: '#D3D3D3',
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
+    borderWidth: 2,
+    borderColor: '#000',
   },
-  fabText: {
-    color: '#FFF',
-    fontSize: 26,
-  },
-  centerList: {
-    flexGrow: 1,
-    justifyContent: 'center',
+  headerPlusText: {
+    color: '#000',
+    fontSize: 20,
   },
 });
