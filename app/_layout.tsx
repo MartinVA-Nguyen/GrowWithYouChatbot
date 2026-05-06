@@ -1,14 +1,14 @@
 import { useColorScheme } from '@/hooks/use-color-scheme';
-import { supabase } from '@/lib/supabase';
 import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import 'react-native-reanimated';
+/*
 import { initDB } from '../database';
-
+import { supabase } from '@/lib/supabase';
 import * as Device from 'expo-device';
-import * as Notifications from 'expo-notifications';
+
 
 async function registerForPushNotificationsAsync() {
   if (!Device.isDevice) return;
@@ -26,6 +26,7 @@ async function registerForPushNotificationsAsync() {
   const tokenData = await Notifications.getExpoPushTokenAsync();
   return tokenData.data;
 }
+
 
 async function savePushToken(token: string) {
   const user = await supabase.auth.getUser();
@@ -51,6 +52,7 @@ useEffect(() => {
   initDB();
 
   async function setupPush() {
+    // Code to set up personalized notifications.
     const token = await registerForPushNotificationsAsync(); // Asks user for permission, returns a unique ID for device.
 
     if (token) {
@@ -58,9 +60,15 @@ useEffect(() => {
       await savePushToken(token); // Saves it to Supabase.
     }
   }
-
   setupPush();
-}, []);
+}, []);*/
+
+export default function RootLayout() {
+  const colorScheme = useColorScheme();
+
+  useEffect(() => {
+    //initDB();
+  }, []);
 
   return (
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
